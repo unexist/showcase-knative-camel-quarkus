@@ -122,6 +122,59 @@ spec:
 EOF
 ```
 
+```shell
+kubectl apply -f - <<EOF
+apiVersion: sources.knative.dev/v1beta1
+kind: KafkaSource
+metadata:
+  name: kafka-source-todo
+spec:
+  bootstrapServers:
+    - redpanda:9092
+  topics:
+    - todo-created
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: default
+---
+apiVersion: bindings.knative.dev/v1beta1
+kind: KafkaBinding
+metadata:
+  name: kafka-binding-todo
+spec:
+  subject:
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    name: todo
+  bootstrapServers:
+    - redpanda:9092
+---
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: todo-trigger
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: dev.knative.kafka.event
+      source: /apis/v1/namespaces/default/kafkasources/kafka-source-todo#todo-created
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: todo
+    uri: /todo/create
+EOF
+```
+
+== Problems
+```Log
+ [Producer clientId=producer-1] Connection to node 1 (/0.0.0.0:9092) could not be established. Broker may not be available.
+```
+
 == Links
 
 - https://piotrminkowski.com/2021/06/14/knative-eventing-with-quarkus-kafka-and-camel/
