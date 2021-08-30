@@ -1,0 +1,9 @@
+= Showcase for knative eventing based on camel and quarkus
+
+This project holds a showcase knative eventing,
+
+== Links
+
+- https://piotrminkowski.com/2021/06/14/knative-eventing-with-quarkus-kafka-and-camel/
+- https://dzone.com/articles/bind-a-cloud-event-to-knative
+- https://camel.apache.org/docs/
