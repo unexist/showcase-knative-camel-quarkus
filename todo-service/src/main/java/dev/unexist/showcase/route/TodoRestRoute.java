@@ -11,6 +11,7 @@
  
 package dev.unexist.showcase.route;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ import java.util.Optional;
 // camel-k: dependency=mvn:org.apache.camel.quarkus:camel-quarkus-jackson
 
 @ApplicationScoped
-public class TodoRoute extends RouteBuilder {
+public class TodoRestRoute extends RouteBuilder {
     private TodoService todoService = new TodoService();
 
     @Override
@@ -35,14 +36,20 @@ public class TodoRoute extends RouteBuilder {
         rest("todo")
             .post("/")
                 .consumes("application/json").type(Todo.class)
-                .route().bean(todoService, "create(${body})").endRest()
+                .route().bean(todoService, "create(${body})")
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(201))
+                .endRest()
             .get("/{id}")
                 .route().bean(todoService, "findById(${header.id})").endRest()
             .put("/{id}")
                 .consumes("application/json").type(Todo.class)
-                .route().bean(todoService, "update(${header.id},${body})").endRest()
+                .route().bean(todoService, "update(${header.id},${body})")
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(204))
+                .endRest()
             .delete("/{id}")
-                .route().bean(todoService, "delete(${header.id})").endRest()
+                .route().bean(todoService, "delete(${header.id})")
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(204))
+                .endRest()
             .get()
                 .route().bean(todoService, "getAll()").endRest();
     }
@@ -52,6 +59,22 @@ public class TodoRoute extends RouteBuilder {
         private String title;
         private String description;
         private Boolean done;
+
+        /**
+         * Construct a new {@link Todo}
+         *
+         * @param  id           Id of the entry
+         * @param  title        Title of the entry
+         * @param  description  Description of the entry
+         * @param  done         Done state of the entry
+         **/
+
+        public Todo(int id, String title, String description, Boolean done) {
+            this.id = id;
+            this.title = title;
+            this.description = description;
+            this.done = done;
+        }
 
         /**
          * Get id of entry
@@ -210,7 +233,7 @@ public class TodoRoute extends RouteBuilder {
     }
 
     public class TodoRepository {
-        private final Logger LOGGER = LoggerFactory.getLogger(TodoRoute.class);
+        private final Logger LOGGER = LoggerFactory.getLogger(TodoRestRoute.class);
 
         private final List<Todo> list;
 
