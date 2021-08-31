@@ -2,7 +2,7 @@
 
 This project holds a showcase knative eventing with camel and quarkus.
 
-== Install Minikube
+== Create Minikube cluster
 
 ```shell
 minikube start --driver=virtualbox --cpus=4 --memory=8192m
@@ -10,7 +10,7 @@ minikube addons enable metrics-server
 minikube addons enable registry
 minikube addons enable istio-provisioner
 minikube addons enable istio
-minikube tunnel &
+minikube tunnel & #< Asks for sudo password!
 ```
 
 == Install Knative
@@ -65,6 +65,14 @@ kubectl patch configmap/config-network \
   --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
 ```
 
+== Install Knative CLI
+
+```shell
+brew install knative/client/kn
+```
+
+
+
 == Verify installation
 
 === Check knative-eventing
@@ -112,9 +120,9 @@ metadata:
   name: redpanda
 spec:
   ports:
-  - name: http
-    port: 9092
-    targetPort: 9092
+    - name: http
+      port: 9092
+      targetPort: 9092
   selector:
     app.kubernetes.io/name: redpanda
   type: ClusterIP
@@ -136,14 +144,13 @@ spec:
         app.kubernetes.io/name: redpanda
     spec:
       containers:
-      - env:
-        image: vectorized/redpanda:latest
-        imagePullPolicy: Always
-        name: redpanda
-        ports:
-        - containerPort: 9092
-          name: http
-          protocol: TCP
+        - name: redpanda
+          image: vectorized/redpanda:latest
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 9092
+            name: http
+            protocol: TCP
 EOF
 ```
 
@@ -244,11 +251,22 @@ knative-serving             False   Error
 
 > Istio is missing, check the operator logs.
 
+=== Subject missing in kafka binding
+
+```shell
+kubectl get kafkabindings.bindings.knative.dev
+
+NAME                 BOOTSTRAPSERVERS    READY   REASON           AGE
+kafka-binding-todo   ["redpanda:9092"]   False   SubjectMissing   3h58m
+```
+
 == Links
 
 === Knative
+
 - https://piotrminkowski.com/2021/06/14/knative-eventing-with-quarkus-kafka-and-camel/
 - https://knative.dev/docs/admin/install/knative-with-operators/
+- https://docs.openshift.com/container-platform/4.6/serverless/event_sources/serverless-kafka-source.html
 
 === Minikube
 

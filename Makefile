@@ -27,7 +27,12 @@ camel-deploy-rest:
 		todo-service/src/main/java/dev/unexist/showcase/route/TodoRestRoute.java \
 		--save
 
+#camel-deploy-kafka:
+#	kamel run --name todo-kafka --dev -e "KAFKA_BOOTSTRAP_SERVERS=redpanda:9092" \
+#		todo-service/src/main/java/dev/unexist/showcase/route/TodoKafkaRoute.java \
+#		--save
+
 camel-deploy-kafka:
-	kamel run --name todo-kafka --dev -e "KAFKA_BOOTSTRAP_SERVERS=redpanda.default.svc.cluster.local:9092" \
+	kamel run --name todo-kafka --dev \
 		todo-service/src/main/java/dev/unexist/showcase/route/TodoKafkaRoute.java \
 		--save
