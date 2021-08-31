@@ -1,0 +1,7 @@
+namespace: default
+
+resources:
+  - knative-kafka-broker.yaml
+  - knative-kafka-binding.yaml
+  - knative-kafka-source.yaml
+  - knative-kafka-trigger.yaml
