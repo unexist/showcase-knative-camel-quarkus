@@ -2,36 +2,23 @@
 
 This project holds a showcase knative eventing with camel and quarkus.
 
-== Tools
-
-brew install knative/client/kn
-
 == Install Minikube
 
-minikube start --driver=virtualbox --cpus=4
+```shell
+minikube start --driver=virtualbox --cpus=4 --memory=8192m
 minikube addons enable metrics-server
 minikube addons enable registry
+minikube addons enable istio-provisioner
+minikube addons enable istio
+minikube tunnel &
+```
 
 == Install Knative
 
-kubectl apply -f https://github.com/knative/operator/releases/download/v0.25.0/operator.yaml
-
 ```shell
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: knative-serving
----
-apiVersion: operator.knative.dev/v1alpha1
-kind: KnativeServing
-metadata:
-    name: knative-serving
-    namespace: knative-serving
-EOF
-```
-
+kubectl apply -f https://github.com/knative/operator/releases/download/v0.25.0/operator.yaml
 kubectl apply -f https://github.com/knative/serving/releases/download/v0.25.0/serving-default-domain.yaml
+```
 
 ```shell
 kubectl apply -f - <<EOF
@@ -45,7 +32,67 @@ kind: KnativeEventing
 metadata:
     name: knative-eventing
     namespace: knative-eventing
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: knative-serving
+---
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+    name: knative-serving
+    namespace: knative-serving
 EOF
+```
+
+== Install Kourier and configure DNS
+
+```shell
+kubectl apply -f https://github.com/knative/net-kourier/releases/download/v0.25.0/kourier.yaml
+
+EXTERNAL_IP=$(kubectl -n kourier-system get service kourier -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo EXTERNAL_IP=$EXTERNAL_IP
+
+KNATIVE_DOMAIN="$EXTERNAL_IP.nip.io"
+echo KNATIVE_DOMAIN=$KNATIVE_DOMAIN
+
+kubectl patch configmap -n knative-serving config-domain -p "{\"data\": {\"$KNATIVE_DOMAIN\": \"\"}}"
+
+kubectl patch configmap/config-network \
+  --namespace knative-serving \
+  --type merge \
+  --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
+```
+
+== Verify installation
+
+=== Check knative-eventing
+
+```shell
+kubectl get KnativeEventing knative-eventing -n knative-eventing
+
+NAME               VERSION   READY   REASON
+knative-eventing   0.25.0    True
+
+kubectl get deployment -n knative-eventing
+```
+
+=== Check knative-serving
+
+```shell
+kubectl get KnativeServing knative-serving -n knative-serving
+
+NAME              VERSION   READY   REASON
+knative-serving   0.25.0    True
+
+kubectl get deployment -n knative-serving
+```
+
+=== Check logs of the operator
+
+```shell
+kubectl logs -f deploy/knative-operator
 ```
 
 == Install Kamel
@@ -100,9 +147,11 @@ spec:
 EOF
 ```
 
+```shell
 kubectl apply -f https://github.com/knative-sandbox/eventing-kafka-broker/releases/download/v0.25.0/eventing-kafka-controller.yaml
 kubectl apply -f https://github.com/knative-sandbox/eventing-kafka-broker/releases/download/v0.25.0/eventing-kafka-broker.yaml
 kubectl apply -f https://storage.googleapis.com/knative-releases/eventing-contrib/latest/kafka-source.yaml
+```
 
 ```shell
 kubectl apply -f - <<EOF
@@ -171,15 +220,39 @@ EOF
 ```
 
 == Problems
+
+=== Broker cannot be reached from Camel
+
 ```Log
  [Producer clientId=producer-1] Connection to node 1 (/0.0.0.0:9092) could not be established. Broker may not be available.
 ```
 
+=== External IP pending
+
+kubectl -n kourier-system get service kourier
+
+> minikube tunnel asks for a password which I wasn't aware of.
+
+=== Knative-serving is not ready
+
+```
+kubectl get KnativeServing knative-serving -n knative-serving
+
+NAME              VERSION   READY   REASON
+knative-serving             False   Error
+```
+
+> Istio is missing, check the operator logs.
+
 == Links
 
+=== Knative
 - https://piotrminkowski.com/2021/06/14/knative-eventing-with-quarkus-kafka-and-camel/
-- https://github.com/csantanapr/knative-minikube
 - https://knative.dev/docs/admin/install/knative-with-operators/
+
+=== Minikube
+
+- https://github.com/csantanapr/knative-minikube
 
 === Kafka
 
