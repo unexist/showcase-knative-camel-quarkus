@@ -1,0 +1,11 @@
+apiVersion: bindings.knative.dev/v1beta1
+kind: KafkaBinding
+metadata:
+  name: kafka-binding-todo
+spec:
+  subject:
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    name: todo
+  bootstrapServers:
+    - redpanda:9092

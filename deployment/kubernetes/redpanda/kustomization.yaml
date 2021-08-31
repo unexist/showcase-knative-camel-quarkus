@@ -1,0 +1,3 @@
+resources:
+  - redpanda-service.yaml
+  - redpanda-deployment.yaml

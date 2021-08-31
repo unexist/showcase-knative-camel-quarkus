@@ -1,0 +1,7 @@
+resources:
+  - knative-eventing.yaml
+  - knative-serving.yaml
+  - knative-broker.yaml
+  - knative-kafka-source.yaml
+  - knative-kafka-binding.yaml
+  - knative-trigger.yaml
