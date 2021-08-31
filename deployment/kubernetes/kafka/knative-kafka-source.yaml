@@ -4,7 +4,7 @@ metadata:
   name: kafka-source-todo
 spec:
   bootstrapServers:
-    - redpanda:9092
+    - redpanda.default.svc.cluster.local:9092
   topics:
     - todo-created
   sink:

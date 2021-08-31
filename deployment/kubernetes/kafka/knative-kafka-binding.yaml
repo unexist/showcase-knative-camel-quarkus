@@ -8,4 +8,4 @@ spec:
     kind: Service
     name: todo
   bootstrapServers:
-    - redpanda:9092
+    - redpanda.default.svc.cluster.local:9092
