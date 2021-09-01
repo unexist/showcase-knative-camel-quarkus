@@ -1,18 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: redpanda
+  name: redpanda-service
   labels:
-    networking.knative.dev/visibility: cluster-local
-    app.kubernetes.io/name: redpanda
+    app: redpanda
 spec:
   type: ClusterIP
+  publishNotReadyAddresses: true
   ports:
-    - name: kafka
+    - name: kafka-tcp
       port: 9092
-      targetPort: 9092
-    - name: rpc
-      port: 33145
-      targetPort: 33145
+      targetPort: kafka-tcp
+      protocol: TCP
   selector:
-    app.kubernetes.io/name: redpanda
+    app: redpanda

@@ -1,4 +1,4 @@
-namespace: default
+namespace: redpanda
 
 resources:
   - redpanda-service.yaml
