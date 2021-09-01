@@ -23,7 +23,7 @@ spec:
             - >
               CONFIG=/etc/redpanda/redpanda.yaml;
               NODE_ID=0;
-              SERVICE_NAME=redpanda-service.redpanda;
+              SERVICE_NAME=redpanda-service.redpanda.svc.cluster.local;
               rpk --config $CONFIG config set redpanda.node_id $NODE_ID;
               if [ "$NODE_ID" = "0" ]; then
                 rpk --config $CONFIG config set redpanda.seed_servers '[]' --format yaml;
@@ -34,6 +34,19 @@ spec:
         - name: redpanda
           image: vectorized/redpanda:latest
           imagePullPolicy: Always
+          args:
+            - >
+              --rpc-addr $(MY_POD_IP):33145
+              --kafka-addr $(MY_POD_IP):9092
+              --check=false
+              start
+              --
+              --reserve-memory 0M
+          env:
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           ports:
             - name: kafka-tcp
               containerPort: 9092
