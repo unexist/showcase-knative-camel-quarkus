@@ -4,16 +4,15 @@ metadata:
   name: redpanda
   labels:
     networking.knative.dev/visibility: cluster-local
+    app.kubernetes.io/name: redpanda
 spec:
   type: ClusterIP
   ports:
     - name: kafka
       port: 9092
       targetPort: 9092
-      protocol: TCP
     - name: rpc
       port: 33145
       targetPort: 33145
-      protocol: TCP
   selector:
     app.kubernetes.io/name: redpanda
