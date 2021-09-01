@@ -19,6 +19,9 @@ spec:
           image: vectorized/redpanda:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 9092
-              name: http
+            - name: kafka
+              containerPort: 9092
+              protocol: TCP
+            - name: rpc
+              containerPort: 33145
               protocol: TCP
