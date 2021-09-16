@@ -35,7 +35,7 @@ public class TodoKafkaRoute extends RouteBuilder {
     public void configure() throws Exception {
         restConfiguration().bindingMode(RestBindingMode.json);
 
-        /* Create create endpoint for trigger */
+        /* Create endpoint for trigger */
         rest("todo")
             .post("/create")
                 .consumes("application/json")

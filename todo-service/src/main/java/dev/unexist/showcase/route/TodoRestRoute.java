@@ -33,6 +33,7 @@ public class TodoRestRoute extends RouteBuilder {
     public void configure() throws Exception {
         restConfiguration().bindingMode(RestBindingMode.json);
 
+        /* Create REST endpoint */
         rest("todo")
             .post("/")
                 .consumes("application/json").type(Todo.class)
