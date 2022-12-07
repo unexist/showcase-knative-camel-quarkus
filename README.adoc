@@ -1,6 +1,6 @@
 = Showcase for Knative eventing based on Camel and Quarkus
 
-This project holds a showcase Knative eventing with Aamel and Quarkus.
+This project holds a showcase Knative eventing with Camel and Quarkus.
 
 == Create Minikube cluster
 
